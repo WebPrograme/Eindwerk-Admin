@@ -1,0 +1,14 @@
+{
+	"compileOnSave": true,
+	"compilerOptions": {
+		"module": "ES2022",
+		"esModuleInterop": false,
+		"target": "es6",
+		"noImplicitAny": true,
+		"sourceMap": false,
+		"outDir": "modules/",
+		"baseUrl": "."
+	},
+	"include": ["ts/**/*"],
+	"exclude": ["ts/types.ts"]
+}

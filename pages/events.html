@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1.0" />
+		<title>HHKW</title>
+
+		<link rel="icon" type="image/x-icon" href="../images/logo.png" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<link rel="stylesheet" href="../css/events.css" />
+		<script src="https://kit.fontawesome.com/62dc937956.js" crossorigin="anonymous"></script>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+		<script src="https://unpkg.com/lucide@latest"></script>
+	</head>
+	<body>
+		<nav class="sidebar">
+			<div class="sidebar-profile">
+				<div class="sidebar-profile-img-container">
+					<img
+						src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+						alt=""
+						class="sidebar-profile-img"
+					/>
+				</div>
+				<div class="sidebar-profile-info">
+					<h3 class="sidebar-profile-name">Yarne Gooris</h3>
+					<p class="sidebar-profile-title">HHKW</p>
+				</div>
+			</div>
+
+			<div class="sidebar-menu">
+				<a class="sidebar-menu-item" href="home.html"><i data-lucide="home" class="sidebar-menu-item-icon"></i><span>Home</span></a>
+				<a class="sidebar-menu-item" href="wondelgem.html"><i data-lucide="archive" class="sidebar-menu-item-icon"></i><span>Wondelgem</span></a>
+				<a class="sidebar-menu-item sidebar-menu-submenu-trigger"
+					><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Blog</span> <i data-lucide="chevron-down" class="sidebar-menu-item-icon"></i
+				></a>
+				<div class="sidebar-menu-submenu open">
+					<div>
+						<a class="sidebar-menu-item" href="articles.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Artikelen</span></a>
+						<a class="sidebar-menu-item active" href="events.html"><i data-lucide="calendar" class="sidebar-menu-item-icon"></i><span>Evenementen</span></a>
+					</div>
+				</div>
+				<a class="sidebar-menu-item" href="wie-zijn-we.html"><i data-lucide="contact" class="sidebar-menu-item-icon"></i><span>Wie zijn we</span></a>
+			</div>
+
+			<div class="sidebar-menu">
+				<a class="sidebar-menu-item" href="settings.html" data-role="admin"><i data-lucide="settings" class="sidebar-menu-item-icon"></i><span>Instellingen</span></a>
+			</div>
+		</nav>
+
+		<nav class="mobile-header">
+			<a class="mobile-header-sidebar-trigger"><i class="fa-solid fa-bars-staggered fa-fw"></i></a>
+
+			<h1 class="mobile-header-title">HHKW</h1>
+
+			<a class="mobile-header-scanner" href="scanner.html"><i data-lucide="qr-code" class="sidebar-menu-item-icon"></i></a>
+		</nav>
+
+		<div class="sidebar-overlay"></div>
+
+		<div class="loader" id="main-loader"><i data-lucide="loader-2"></i></div>
+
+		<div class="drawer drawer-lg" id="add-event-item-drawer">
+			<div class="drawer-overlay"></div>
+			<div class="drawer-content">
+				<div class="drawer-header">
+					<h3 class="drawer-title">Item toevoegen <span class="event-item-id-label"></span></h3>
+				</div>
+
+				<div class="drawer-body">
+					<label class="label" for="event-item-title">Titel</label>
+					<input type="text" class="input" id="event-item-title" placeholder="Titel" spellcheck="false" autocomplete="off" />
+
+					<label class="label" for="event-item-photo">Foto</label>
+					<div class="flex flex-wrap align-baseline gap-0-5 mb-1">
+						<input type="file" class="input mb-0" id="event-item-photo" accept="image/*" />
+						<button class="btn btn-secondary photo-preview-trigger hidden" data-title="Toon de afbeelding">Voorbeeld</button>
+					</div>
+
+					<label class="label" for="event-item-date">Datum</label>
+					<input type="date" class="input" id="event-item-date" />
+
+					<input type="hidden" id="event-item-id" />
+					<input type="hidden" id="event-item-createdat" />
+					<input type="hidden" id="event-item-timestamp" />
+				</div>
+
+				<div class="drawer-footer drawer-footer-3btn">
+					<div class="btn-stack">
+						<button class="btn btn-primary event-item-save">Opslaan</button>
+						<button class="btn btn-secondary drawer-close">Annuleren</button>
+					</div>
+
+					<button class="btn btn-danger event-item-delete hidden">Verwijderen</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal modal-lg modal-photo" id="photo-preview-modal">
+			<div class="modal-overlay"></div>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title">Foto</h3>
+					<a class="modal-close"><i class="fa-solid fa-times"></i></a>
+				</div>
+
+				<div class="modal-body">
+					<img src="" alt="" class="photo-preview" />
+				</div>
+
+				<div class="modal-footer justify-center">
+					<button class="btn btn-secondary btn-modal-close">Sluiten</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal modal-lg modal-confirmation" id="delete-event-modal">
+			<div class="modal-overlay"></div>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title">Weet je het zeker?</h3>
+					<p class="modal-subtitle">De volgende actie kan niet ongedaan worden gemaakt.</p>
+				</div>
+
+				<div class="modal-body">
+					<p>Weet je zeker dat je het event wilt verwijderen?</p>
+				</div>
+
+				<div class="modal-footer btn-stack mt-2">
+					<button class="btn btn-secondary btn-modal-close">Annuleren</button>
+					<button class="btn btn-danger event-item-delete-confirm">Verwijder</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="main">
+			<div class="main-header">
+				<h1 class="main-title">Evenementen</h1>
+				<p class="main-subtitle">Bekijk en beheer de evenementen</p>
+			</div>
+
+			<div class="main-body">
+				<div class="btn-stack main-actions mb-3">
+					<a class="btn btn-primary" id="btn-add-event">Item toevoegen</a>
+				</div>
+
+				<h3 class="main-subtitle">Opkomende Evenementen</h3>
+				<div class="events-upcoming-cards"></div>
+
+				<h3 class="main-subtitle">Afgelopen Evenementen</h3>
+				<div class="events-expired-cards"></div>
+
+				<div class="search-table hidden"></div>
+			</div>
+		</div>
+
+		<script type="module" src="../js/main.js"></script>
+		<script type="module" src="../js/events.js"></script>
+	</body>
+</html>
