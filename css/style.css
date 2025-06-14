@@ -1891,7 +1891,7 @@ textarea.input::-webkit-resizer {
 .drawer-body .invisible-block {
     opacity: 0;
     pointer-events: none;
-    height: 400px;
+    height: 90vh;
     width: 100%;
 }
 

@@ -7,7 +7,6 @@
 
 		<link rel="icon" type="image/x-icon" href="../images/logo.png" />
 		<link rel="stylesheet" href="../css/style.css" />
-		<link rel="stylesheet" href="../css/events.css" />
 		<script src="https://kit.fontawesome.com/62dc937956.js" crossorigin="anonymous"></script>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,14 +31,14 @@
 
 			<div class="sidebar-menu">
 				<a class="sidebar-menu-item" href="home.html"><i data-lucide="home" class="sidebar-menu-item-icon"></i><span>Home</span></a>
-				<a class="sidebar-menu-item" href="wondelgem.html"><i data-lucide="archive" class="sidebar-menu-item-icon"></i><span>Wondelgem</span></a>
+				<a class="sidebar-menu-item active" href="wondelgem.html"><i data-lucide="archive" class="sidebar-menu-item-icon"></i><span>Wondelgem</span></a>
 				<a class="sidebar-menu-item sidebar-menu-submenu-trigger"
 					><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Blog</span> <i data-lucide="chevron-down" class="sidebar-menu-item-icon"></i
 				></a>
-				<div class="sidebar-menu-submenu open">
+				<div class="sidebar-menu-submenu">
 					<div>
 						<a class="sidebar-menu-item" href="articles.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Artikelen</span></a>
-						<a class="sidebar-menu-item active" href="events.html"><i data-lucide="calendar" class="sidebar-menu-item-icon"></i><span>Evenementen</span></a>
+						<a class="sidebar-menu-item" href="events.html"><i data-lucide="calendar" class="sidebar-menu-item-icon"></i><span>Evenementen</span></a>
 					</div>
 				</div>
 				<a class="sidebar-menu-item" href="wie-zijn-we.html"><i data-lucide="contact" class="sidebar-menu-item-icon"></i><span>Wie zijn we</span></a>
@@ -62,38 +61,71 @@
 
 		<div class="loader" id="main-loader"><i data-lucide="loader-2"></i></div>
 
-		<div class="drawer" id="add-event-item-drawer">
+		<div class="drawer" id="add-archive-item-drawer">
 			<div class="drawer-overlay"></div>
 			<div class="drawer-content">
 				<div class="drawer-header">
-					<h3 class="drawer-title">Item toevoegen <span class="event-item-id-label"></span></h3>
+					<h3 class="drawer-title">Item toevoegen <span class="archive-item-id-label"></span></h3>
 				</div>
 
 				<div class="drawer-body">
-					<label class="label" for="event-item-title">Titel</label>
-					<input type="text" class="input" id="event-item-title" placeholder="Titel" spellcheck="false" autocomplete="off" />
+					<label class="label" for="archive-item-title">Titel</label>
+					<input type="text" class="input" id="archive-item-title" placeholder="Titel" spellcheck="false" autocomplete="off" />
 
-					<label class="label" for="event-item-photo">Foto</label>
+					<label class="label" for="archive-item-photo">Foto</label>
 					<div class="flex flex-wrap align-baseline gap-0-5 mb-1">
-						<input type="file" class="input mb-0" id="event-item-photo" accept="image/*" />
+						<input type="file" class="input mb-0" id="archive-item-photo" accept="image/*" />
 						<button class="btn btn-secondary photo-preview-trigger hidden" data-title="Toon de afbeelding">Voorbeeld</button>
 					</div>
 
-					<label class="label" for="event-item-date">Datum</label>
-					<input type="date" class="input" id="event-item-date" />
+					<label class="label" for="archive-item-description">Beschrijving</label>
+					<textarea class="input" id="archive-item-description" placeholder="Beschrijving" spellcheck="false" autocomplete="off"></textarea>
 
-					<input type="hidden" id="event-item-id" />
-					<input type="hidden" id="event-item-createdat" />
-					<input type="hidden" id="event-item-timestamp" />
-				</div>
-
-				<div class="drawer-footer drawer-footer-3btn">
-					<div class="btn-stack">
-						<button class="btn btn-primary event-item-save">Opslaan</button>
-						<button class="btn btn-secondary drawer-close">Annuleren</button>
+					<label class="label mt-1" for="archive-item-date">Datum</label>
+					<p class="label-subtitle">De datum hoeft niet exact te zijn, alleen het jaar is ook goed.</p>
+					<div class="input-date-group">
+						<input type="number" class="input" id="archive-item-date-day" placeholder="Dag" />
+						<input type="number" class="input" id="archive-item-date-month" placeholder="Maand" />
+						<input type="number" class="input" id="archive-item-date-year" placeholder="Jaar" />
 					</div>
 
-					<button class="btn btn-danger event-item-delete hidden">Verwijderen</button>
+					<label class="label" for="archive-item-order">Volgorde</label>
+					<p class="label-subtitle">
+						De volgorde waarin dit item getoond wordt. Gebruik <span class="text-primary" id="archive-item-last-index"></span> om het item als laatste te tonen.
+					</p>
+					<input type="number" class="input" id="archive-item-order" placeholder="Volgorde" min="0" />
+
+					<div class="switch-container mt-2">
+						<div class="switch-label">
+							<label class="label" for="archive-item-timeline">Tijdlijn</label>
+							<p class="label-subtitle">Toon dit item op de tijdlijn.</p>
+						</div>
+						<input type="checkbox" class="switch switch-lg" id="archive-item-timeline" />
+					</div>
+
+					<div class="switch-container mt-1">
+						<div class="switch-label">
+							<label class="label" for="archive-item-page">Aparte pagina</label>
+							<p class="label-subtitle">Toon dit item ook op een aparte pagina.</p>
+						</div>
+						<input type="checkbox" class="switch switch-lg" id="archive-item-page" />
+					</div>
+
+					<div class="switch-container mt-1 mb-2">
+						<div class="switch-label">
+							<label class="label" for="archive-item-vroonhof">Vroonhof</label>
+							<p class="label-subtitle">Toon een Vroonhof label bij dit item.</p>
+						</div>
+						<input type="checkbox" class="switch switch-lg" id="archive-item-vroonhof" />
+					</div>
+
+					<input type="hidden" id="archive-item-id" />
+					<input type="hidden" id="archive-item-createdat" />
+				</div>
+
+				<div class="drawer-footer">
+					<button class="btn btn-primary archive-item-save">Opslaan</button>
+					<button class="btn btn-secondary drawer-close">Annuleren</button>
 				</div>
 			</div>
 		</div>
@@ -116,7 +148,7 @@
 			</div>
 		</div>
 
-		<div class="modal modal-lg modal-confirmation" id="delete-event-modal">
+		<div class="modal modal-lg modal-confirmation" id="delete-archive-modal">
 			<div class="modal-overlay"></div>
 			<div class="modal-content">
 				<div class="modal-header">
@@ -125,38 +157,35 @@
 				</div>
 
 				<div class="modal-body">
-					<p>Weet je zeker dat je het event wilt verwijderen?</p>
+					<p>Weet je zeker dat je de items wilt verwijderen?</p>
 				</div>
 
 				<div class="modal-footer btn-stack mt-2">
 					<button class="btn btn-secondary btn-modal-close">Annuleren</button>
-					<button class="btn btn-danger event-item-delete-confirm">Verwijder</button>
+					<button class="btn btn-danger archive-item-delete">Verwijder</button>
 				</div>
 			</div>
 		</div>
 
 		<div class="main">
 			<div class="main-header">
-				<h1 class="main-title">Evenementen</h1>
-				<p class="main-subtitle">Bekijk en beheer de evenementen</p>
+				<h1 class="main-title">Wondelgem</h1>
+				<p class="main-subtitle">Bekijk en beheer de artikelen van Wondelgem.</p>
 			</div>
 
 			<div class="main-body">
-				<div class="btn-stack main-actions mb-3">
-					<a class="btn btn-primary" id="btn-add-event">Item toevoegen</a>
+				<div class="btn-stack main-actions">
+					<a class="btn btn-primary" id="btn-add-archive">Item toevoegen</a>
+					<div>
+						<input type="search" class="search input" placeholder="Zoeken..." />
+					</div>
 				</div>
 
-				<h3 class="main-subtitle">Opkomende Evenementen</h3>
-				<div class="events-upcoming-cards"></div>
-
-				<h3 class="main-subtitle">Afgelopen Evenementen</h3>
-				<div class="events-expired-cards"></div>
-
-				<div class="search-table hidden"></div>
+				<div class="archive-table mt-1"></div>
 			</div>
 		</div>
 
 		<script type="module" src="../js/main.js"></script>
-		<script type="module" src="../js/events.js"></script>
+		<script type="module" src="../js/wondelgem.js"></script>
 	</body>
 </html>
