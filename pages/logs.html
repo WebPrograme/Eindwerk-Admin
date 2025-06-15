@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, width=device-width" />
+		<meta name="theme-color" content="#fff" />
+		<title>HHKW</title>
+
+		<link rel="icon" type="image/x-icon" href="../images/logo secondary color.png" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<link rel="stylesheet" href="../css/logs.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+		<script src="https://kit.fontawesome.com/62dc937956.js" crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/lucide@latest"></script>
+	</head>
+	<body>
+		<nav class="sidebar">
+			<div class="sidebar-profile">
+				<div class="sidebar-profile-img-container">
+					<img
+						src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+						alt=""
+						class="sidebar-profile-img"
+					/>
+				</div>
+				<div class="sidebar-profile-info">
+					<h3 class="sidebar-profile-name">Yarne Gooris</h3>
+					<p class="sidebar-profile-title">HHKW</p>
+				</div>
+			</div>
+
+			<div class="sidebar-menu">
+				<a class="sidebar-menu-item" href="home.html"><i data-lucide="home" class="sidebar-menu-item-icon"></i><span>Home</span></a>
+				<a class="sidebar-menu-item" href="wondelgem.html"><i data-lucide="archive" class="sidebar-menu-item-icon"></i><span>Wondelgem</span></a>
+				<a class="sidebar-menu-item sidebar-menu-submenu-trigger"
+					><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Blog</span> <i data-lucide="chevron-down" class="sidebar-menu-item-icon"></i
+				></a>
+				<div class="sidebar-menu-submenu">
+					<div>
+						<a class="sidebar-menu-item" href="articles.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Artikelen</span></a>
+						<a class="sidebar-menu-item" href="events.html"><i data-lucide="calendar" class="sidebar-menu-item-icon"></i><span>Evenementen</span></a>
+					</div>
+				</div>
+				<a class="sidebar-menu-item" href="wie-zijn-we.html"><i data-lucide="contact" class="sidebar-menu-item-icon"></i><span>Wie zijn we</span></a>
+				<a class="sidebar-menu-item" href="publications.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Publicaties</span></a>
+			</div>
+
+			<div class="sidebar-menu">
+				<a class="sidebar-menu-item active" href="logs.html"><i data-lucide="scroll-text" class="sidebar-menu-item-icon"></i><span>Logs</span></a>
+			</div>
+		</nav>
+
+		<nav class="mobile-header">
+			<a class="mobile-header-sidebar-trigger"><i class="fa-solid fa-bars-staggered fa-fw"></i></a>
+
+			<h1 class="mobile-header-title">HHKW</h1>
+
+			<a class="mobile-header-scanner" href="scanner.html"><i data-lucide="qr-code" class="sidebar-menu-item-icon"></i></a>
+		</nav>
+
+		<div class="sidebar-overlay"></div>
+
+		<div class="loader" id="main-loader"><i data-lucide="loader-2"></i></div>
+		<div class="modal" id="log-details-modal">
+			<div class="modal-overlay"></div>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title">Log details</h2>
+					<p class="modal-subtitle">Hier kan je de details van de log bekijken</p>
+				</div>
+
+				<a class="modal-close"><i class="fa-solid fa-times fa-fw"></i></a>
+
+				<div class="modal-body">
+					<div id="log-details">
+						<h4>Actie</h4>
+						<p id="log-action"></p>
+						<h4>Beschrijving</h4>
+						<p id="log-description"></p>
+						<h4>Timestamp</h4>
+						<p id="log-timestamp"></p>
+						<h4>Diepe Informatie</h4>
+						<pre id="log-deep-info"></pre>
+					</div>
+				</div>
+
+				<div class="modal-footer btn-stack">
+					<button class="btn btn-secondary btn-modal-close">Sluiten</button>
+					<button class="btn btn-primary" id="log-details-go-to-button">Ga naar</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="main">
+			<div class="main-header">
+				<h1 class="main-title">Logs</h1>
+				<p class="main-subtitle">Hier kan je de logs van de website bekijken. Dit is enkel voor admins zichtbaar.</p>
+			</div>
+
+			<div class="main-body">
+				<div class="table-container">
+					<div id="logs-table"></div>
+				</div>
+			</div>
+		</div>
+
+		<script type="module" src="../js/main.js"></script>
+		<script type="module" src="../js/logs.js"></script>
+	</body>
+</html>

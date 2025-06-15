@@ -1,0 +1,8 @@
+#log-details p {
+    margin-bottom: 0.5rem;
+}
+
+#log-deep-info {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

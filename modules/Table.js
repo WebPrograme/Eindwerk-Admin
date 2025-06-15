@@ -177,7 +177,7 @@ export default class Table {
 		if (this.onRowClick) {
 			this.element.querySelector('table').classList.add('table-clickable');
 			tr.addEventListener('click', () => {
-				this.onRowClick(row);
+				this.onRowClick(row, this.data);
 			});
 		}
 

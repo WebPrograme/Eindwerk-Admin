@@ -2018,6 +2018,16 @@ textarea.input::-webkit-resizer {
     background-color: #f6f6f775;
 }
 
+.table .table-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
 .table .table-badge {
     padding: .25rem .75rem;
     border-radius: 10rem;

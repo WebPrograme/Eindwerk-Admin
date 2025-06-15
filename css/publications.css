@@ -3,6 +3,13 @@
     color: var(--secondary-color);
 }
 
+.publications-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin: 1rem 0;
+}
+
 .publications-card {
     position: relative;
     display: flex;
