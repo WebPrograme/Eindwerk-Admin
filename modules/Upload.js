@@ -3,14 +3,14 @@ import Auth from './Auth.js';
 
 const storage = getStorage(Auth.app);
 
-async function UploadImage(path, image, input) {
+async function uploadFile(path, file, input, contentType) {
 	const metadata = {
-		contentType: 'image/jpeg',
+		contentType: contentType,
 		cacheControl: 'public, max-age=31536000',
 	};
-	const ref = storageRef(storage, path + '/' + image.name);
+	const ref = storageRef(storage, path + '/' + file.name);
 
-	const url = await uploadBytes(ref, image, metadata).then(function (snapshot) {
+	const url = await uploadBytes(ref, file, metadata).then(function (snapshot) {
 		return getDownloadURL(ref);
 	});
 
@@ -18,6 +18,14 @@ async function UploadImage(path, image, input) {
 	input.setAttribute('data-url', url);
 
 	return url;
+}
+
+async function UploadImage(path, image, input) {
+	return uploadFile(path, image, input, 'image/jpeg');
+}
+
+async function UploadPDF(path, pdf, input) {
+	return uploadFile(path, pdf, input, 'application/pdf');
 }
 
 async function UndoUpload(path, image) {
@@ -28,4 +36,4 @@ async function UndoUpload(path, image) {
 	return result;
 }
 
-export default { UploadImage, UndoUpload };
+export default { UploadImage, UploadPDF, UndoUpload };

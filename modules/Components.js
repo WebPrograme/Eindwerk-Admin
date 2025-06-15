@@ -1,5 +1,3 @@
-import Dropdown from './Dropdown.js';
-
 // Contact Page
 export function CreateContactSection(section, parent, clickEvent) {
 	// Create contact section
@@ -25,4 +23,52 @@ export function CreateContactSection(section, parent, clickEvent) {
 	contactSection.addEventListener('click', clickEvent);
 
 	parent.appendChild(contactSection);
+}
+
+// Events Page
+export function CreateEventCard(event, parent, clickEvent) {
+	// Create event card
+	const card = document.createElement('div');
+	card.classList.add('events-card');
+	card.innerHTML = `
+			<img
+				class="events-card-img"
+				src="${event.Image}"
+				alt="${event.Title}"
+			/>
+			<div class="events-card-date">
+				<span>${new Date(event.Date).getDate()} ${new Intl.DateTimeFormat('nl-BE', { month: 'short' }).format(new Date(event.Date))} '${new Date(event.Date)
+		.getFullYear()
+		.toString()
+		.slice(-2)}</span>
+			</div>
+			<div class="events-card-title">
+				<h3>${event.Title}</h3>
+			</div>
+			<i class="fa-solid fa-up-right-from-square events-card-open-icon"></i>`;
+
+	card.addEventListener('click', clickEvent);
+
+	parent.appendChild(card);
+}
+
+// Publications Page
+export function CreatePublicationCard(publication, parent, clickEvent) {
+	// Create publication card
+	const card = document.createElement('div');
+	card.classList.add('publications-card');
+	card.innerHTML = `
+			<img
+				class="publications-card-img"
+				src="${publication.CoverImage}"
+				alt="${publication.Title}"
+			/>
+			<div class="publications-card-title">
+				<h3>${publication.Title}</h3>
+			</div>
+			<i class="fa-solid fa-up-right-from-square publications-card-open-icon"></i>`;
+
+	card.addEventListener('click', clickEvent);
+
+	parent.appendChild(card);
 }

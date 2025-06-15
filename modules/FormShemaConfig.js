@@ -191,3 +191,43 @@ export const newContactSectionInputConfig = {
     showErrors: true,
     update: true,
 };
+// publications.js
+export const newPublicationInputConfig = {
+    inputs: [
+        {
+            selector: '#publication-title',
+            requirements: {
+                type: 'string',
+                min: 3,
+                max: 50,
+            },
+        },
+        {
+            selector: '#publication-cover',
+            requirements: {
+                type: 'function',
+                function: (value) => {
+                    if (value) {
+                        return true;
+                    }
+                    return false;
+                },
+            },
+        },
+        {
+            selector: '#publication-content',
+            requirements: {
+                type: 'function',
+                function: (value) => {
+                    if (value) {
+                        return true;
+                    }
+                    return false;
+                },
+            },
+        },
+    ],
+    submit: '.publication-save',
+    showErrors: true,
+    update: true,
+};

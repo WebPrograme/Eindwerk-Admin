@@ -7,7 +7,7 @@
 
 		<link rel="icon" type="image/x-icon" href="../images/logo secondary color.png" />
 		<link rel="stylesheet" href="../css/style.css" />
-		<link rel="stylesheet" href="../css/events.css" />
+		<link rel="stylesheet" href="../css/publications.css" />
 		<script src="https://kit.fontawesome.com/62dc937956.js" crossorigin="anonymous"></script>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,14 +36,14 @@
 				<a class="sidebar-menu-item sidebar-menu-submenu-trigger"
 					><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Blog</span> <i data-lucide="chevron-down" class="sidebar-menu-item-icon"></i
 				></a>
-				<div class="sidebar-menu-submenu open">
+				<div class="sidebar-menu-submenu">
 					<div>
 						<a class="sidebar-menu-item" href="articles.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Artikelen</span></a>
-						<a class="sidebar-menu-item active" href="events.html"><i data-lucide="calendar" class="sidebar-menu-item-icon"></i><span>Evenementen</span></a>
+						<a class="sidebar-menu-item" href="events.html"><i data-lucide="calendar" class="sidebar-menu-item-icon"></i><span>Evenementen</span></a>
 					</div>
 				</div>
 				<a class="sidebar-menu-item" href="wie-zijn-we.html"><i data-lucide="contact" class="sidebar-menu-item-icon"></i><span>Wie zijn we</span></a>
-				<a class="sidebar-menu-item" href="publications.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Publicaties</span></a>
+				<a class="sidebar-menu-item active" href="publications.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Publicaties</span></a>
 			</div>
 
 			<div class="sidebar-menu">
@@ -63,38 +63,43 @@
 
 		<div class="loader" id="main-loader"><i data-lucide="loader-2"></i></div>
 
-		<div class="drawer" id="add-event-item-drawer">
+		<div class="drawer" id="add-publication-drawer">
 			<div class="drawer-overlay"></div>
 			<div class="drawer-content">
 				<div class="drawer-header">
-					<h3 class="drawer-title">Item toevoegen <span class="event-item-id-label"></span></h3>
+					<h3 class="drawer-title">Publicatie toevoegen <span class="publication-id-label"></span></h3>
 				</div>
 
 				<div class="drawer-body">
-					<label class="label" for="event-item-title">Titel</label>
-					<input type="text" class="input" id="event-item-title" placeholder="Titel" spellcheck="false" autocomplete="off" />
+					<label class="label" for="publication-title">Titel</label>
+					<input type="text" class="input" id="publication-title" placeholder="Titel" spellcheck="false" autocomplete="off" />
 
-					<label class="label" for="event-item-photo">Foto</label>
-					<div class="flex flex-wrap align-baseline gap-0-5 mb-1">
-						<input type="file" class="input mb-0" id="event-item-photo" accept="image/*" />
-						<button class="btn btn-secondary photo-preview-trigger hidden" data-title="Toon de afbeelding">Voorbeeld</button>
+					<div id="publication-cover-container">
+						<label class="label" for="publication-cover">Cover</label>
+						<p class="muted">Upload een afbeelding voor de cover van de publicatie.</p>
+						<div class="flex flex-wrap align-baseline gap-0-5 mb-1">
+							<input type="file" class="input mb-0" id="publication-cover" accept="image/*" />
+							<button class="btn btn-secondary cover-preview-trigger hidden" data-title="Toon de afbeelding">Voorbeeld</button>
+						</div>
 					</div>
 
-					<label class="label" for="event-item-date">Datum</label>
-					<input type="date" class="input" id="event-item-date" />
+					<label class="label" for="publication-content">File</label>
+					<p class="muted">Upload een PDF-bestand voor de publicatie.</p>
+					<div class="flex flex-wrap align-baseline gap-0-5 mb-1">
+						<input type="file" class="input mb-0" id="publication-content" accept=".pdf" />
+					</div>
 
-					<input type="hidden" id="event-item-id" />
-					<input type="hidden" id="event-item-createdat" />
-					<input type="hidden" id="event-item-timestamp" />
+					<input type="hidden" id="publication-id" />
+					<input type="hidden" id="publication-createdat" />
 				</div>
 
 				<div class="drawer-footer drawer-footer-3btn">
 					<div class="btn-stack">
-						<button class="btn btn-primary event-item-save">Opslaan</button>
+						<button class="btn btn-primary publication-save">Opslaan</button>
 						<button class="btn btn-secondary drawer-close">Annuleren</button>
 					</div>
 
-					<button class="btn btn-danger event-item-delete hidden">Verwijderen</button>
+					<button class="btn btn-danger publication-delete hidden">Verwijderen</button>
 				</div>
 			</div>
 		</div>
@@ -117,7 +122,7 @@
 			</div>
 		</div>
 
-		<div class="modal modal-lg modal-confirmation" id="delete-event-modal">
+		<div class="modal modal-lg modal-confirmation" id="delete-publication-modal">
 			<div class="modal-overlay"></div>
 			<div class="modal-content">
 				<div class="modal-header">
@@ -126,38 +131,32 @@
 				</div>
 
 				<div class="modal-body">
-					<p>Weet je zeker dat je het event wilt verwijderen?</p>
+					<p>Weet je zeker dat je de publicatie wilt verwijderen?</p>
 				</div>
 
 				<div class="modal-footer btn-stack mt-2">
 					<button class="btn btn-secondary btn-modal-close">Annuleren</button>
-					<button class="btn btn-danger event-item-delete-confirm">Verwijder</button>
+					<button class="btn btn-danger publication-delete-confirm">Verwijder</button>
 				</div>
 			</div>
 		</div>
 
 		<div class="main">
 			<div class="main-header">
-				<h1 class="main-title">Evenementen</h1>
-				<p class="main-subtitle">Bekijk en beheer de evenementen</p>
+				<h1 class="main-title">Publicaties</h1>
+				<p class="main-subtitle">Hieronder vind je een overzicht van alle publicaties die we hebben gemaakt.</p>
 			</div>
 
 			<div class="main-body">
-				<div class="btn-stack main-actions mb-2">
-					<a class="btn btn-primary" id="btn-add-event">Item toevoegen</a>
+				<div class="btn-stack main-actions">
+					<a class="btn btn-primary" id="btn-add-publication">Publicatie toevoegen</a>
 				</div>
 
-				<h3 class="main-subtitle">Opkomende Evenementen</h3>
-				<div class="events-upcoming-cards"></div>
-
-				<h3 class="main-subtitle">Afgelopen Evenementen</h3>
-				<div class="events-expired-cards"></div>
-
-				<div class="search-table hidden"></div>
+				<div class="publications-cards mt-1"></div>
 			</div>
 		</div>
 
 		<script type="module" src="../js/main.js"></script>
-		<script type="module" src="../js/events.js"></script>
+		<script type="module" src="../js/publications.js"></script>
 	</body>
 </html>

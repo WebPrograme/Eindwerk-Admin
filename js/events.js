@@ -3,6 +3,7 @@ import Upload from '../modules/Upload.js';
 import FormShema from '../modules/FormShema.js';
 import { getRequest, postRequest } from '../modules/Requests.js';
 import { newEventInputConfig } from '../modules/FormShemaConfig.js';
+import { CreateEventCard } from '../modules/Components.js';
 import Drawer from '../modules/Drawer.js';
 import Modal from '../modules/Modal.js';
 import Popover from '../modules/Popover.js';
@@ -18,7 +19,6 @@ Auth.getUser()
 		window.location.href = '/pages/login.html';
 	});
 
-let totalevents = 0;
 let eventFile = null;
 
 const deleteEventModal = new Modal(document.getElementById('delete-event-modal'), document.querySelector('.event-item-delete'), false, false);
@@ -59,34 +59,17 @@ async function main(token) {
 	totalevents = data.Total;
 
 	// Create a card for each event
-	Object.values(eventItems).forEach((item) => {
-		const card = document.createElement('div');
-		card.classList.add('events-card');
-		card.innerHTML = `
-			<img
-				class="events-card-img"
-				src="${item.Image}"
-				alt="${item.Title}"
-			/>
-			<div class="events-card-date">
-				<span>${new Date(item.Date).getDate()} ${new Intl.DateTimeFormat('nl-BE', { month: 'short' }).format(new Date(item.Date))} '${new Date(item.Date)
-			.getFullYear()
-			.toString()
-			.slice(-2)}</span>
-			</div>
-			<div class="events-card-title">
-				<h3>${item.Title}</h3>
-			</div>
-			<i class="fa-solid fa-up-right-from-square events-card-open-icon"></i>`;
-
-		card.addEventListener('click', () => openEventDrawer(item));
-
-		if (new Date(item.Date) < now) {
+	Object.values(eventItems).forEach((event) => {
+		if (new Date(event.Date) < now) {
 			expiredEvents++;
-			eventExpiredCards.appendChild(card);
+			CreateEventCard(event, eventExpiredCards, () => {
+				openEventDrawer(event);
+			});
 		} else {
 			upcomingEvents++;
-			eventUpcomingCards.appendChild(card);
+			CreateEventCard(event, eventUpcomingCards, () => {
+				openEventDrawer(event);
+			});
 		}
 	});
 
