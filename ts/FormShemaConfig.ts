@@ -83,7 +83,7 @@ export const newArchiveItemInputConfig: Config = {
 export const newArticleInputConfig: Config = {
 	inputs: [
 		{
-			selector: '#blog-item-title',
+			selector: '#article-item-title',
 			requirements: {
 				type: 'string',
 				min: 3,
@@ -91,13 +91,13 @@ export const newArticleInputConfig: Config = {
 			},
 		},
 		{
-			selector: '#blog-item-photo',
+			selector: '#article-item-photo',
 			requirements: {
 				type: 'any',
 			},
 		},
 		{
-			selector: '#blog-item-description',
+			selector: '#article-item-description',
 			requirements: {
 				type: 'string',
 				min: 3,
@@ -105,7 +105,7 @@ export const newArticleInputConfig: Config = {
 			},
 		},
 	],
-	submit: '.blog-item-save',
+	submit: '.article-item-save',
 	showErrors: true,
 	update: true,
 };

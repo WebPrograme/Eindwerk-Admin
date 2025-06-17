@@ -1,5 +1,5 @@
 import Auth from '../modules/Auth.js';
-const baseUrl = 'http://localhost:3000';
+const baseUrl = 'https://hhkw-eindwerk-api.onrender.com';
 
 async function getCookieToken() {
 	return new Promise((resolve, reject) => {

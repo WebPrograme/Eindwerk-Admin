@@ -10,7 +10,7 @@ import Popover from '../modules/Popover.js';
 import Table from '../modules/Table.js';
 
 const page = window.location.search.includes('page=') ? window.location.search.split('page=')[1].split('&')[0] : 0;
-const count = window.location.search.includes('count=') ? window.location.search.split('count=')[1].split('&')[0] : 50;
+const count = window.location.search.includes('count=') ? window.location.search.split('count=')[1].split('&')[0] : 10;
 
 Auth.getUser()
 	.then((data) => {
@@ -26,28 +26,13 @@ Auth.getUser()
 let totalArticles = 0;
 let articleFile = null;
 
-const searchTable = new Table(document.querySelector('.search-table'), {
-	data: [],
-	columns: [
-		{ title: 'Titel', key: 'Title', sortable: true, classes: ['text-bold', 'article-title'] },
-		{ title: 'Beschrijving', key: 'Description', sortable: true, classes: 'article-description' },
-		{ title: 'Datum', key: 'Date', sortable: true, type: 'date' },
-	],
-	rowAttributes: { 'data-id': 'RawData.ID' },
-	onRowClick: (data) => openArticleDrawer(data.RawData),
-	hasWrapper: true,
-	noDataMessage: 'Geen zoekresultaten gevonden',
-	selectable: true,
-	selectButtons: [
-		{
-			text: 'Verwijderen',
-			classes: ['btn', 'btn-danger'],
-			onClick: (selected) => {
-				deleteArticleModal.open();
-			},
-		},
-	],
-});
+const formatDate = (date) => {
+	const month = new Intl.DateTimeFormat('nl-BE', { month: 'short' }).format(date);
+	return `${new Intl.DateTimeFormat('nl-BE', { day: '2-digit' }).format(date)} ${month.charAt(0).toUpperCase() + month.slice(1)} ${new Intl.DateTimeFormat('nl-BE', {
+		year: 'numeric',
+	}).format(date)}`;
+};
+
 const deleteArticleModal = new Modal(document.getElementById('delete-article-modal'));
 const photoPreviewModal = new Modal(document.getElementById('photo-preview-modal'), document.querySelector('.photo-preview-trigger'));
 const newarticleItemDrawer = new Drawer(document.getElementById('add-article-item-drawer'), document.getElementById('btn-add-article'), { position: 'right' });
@@ -95,7 +80,7 @@ async function main(token, page = 0, count = 50) {
 		],
 		rowAttributes: { 'data-id': 'RawData.ID' },
 		onRowClick: (data) => openArticleDrawer(data.RawData),
-		hasWrapper: true,
+		hasWrapper: false,
 		hasPagination: false,
 		noDataMessage: 'Geen artikelen gevonden',
 		selectable: true,
@@ -108,9 +93,10 @@ async function main(token, page = 0, count = 50) {
 				},
 			},
 		],
+		searchElement: document.querySelector('.search'),
 		pagination: {
 			enabled: true,
-			count: count,
+			limit: count,
 			page: page,
 			showMore: true,
 			total: totalArticles,
@@ -166,23 +152,6 @@ async function openArticleDrawer(row) {
 
 	document.getElementById('article-item-photo').files = data.files;
 	articleFile = data.files;
-}
-
-async function search(query) {
-	const searchQuery = query.replace(/ /g, '-');
-	const { status, data } = await getRequest(`/api/blog/articles/search/${searchQuery}`);
-
-	searchTable.refresh(
-		Object.values(data).map((item) => ({
-			Title: item.Title,
-			Description: item.Description['0'],
-			Date: formatDate(new Date(item.Timestamp)),
-			RawData: item,
-		}))
-	);
-
-	document.querySelector('.article-table').classList.add('hidden');
-	searchTable.element.classList.remove('hidden');
 }
 
 document.getElementById('article-item-photo').addEventListener('change', (e) => {
@@ -261,26 +230,6 @@ document.querySelector('.article-item-delete').addEventListener('click', () => {
 		});
 });
 
-let searchTimeout = null;
-document.querySelector('.search').addEventListener('input', async (e) => {
-	const query = e.target.value;
-
-	if (query === '') {
-		document.querySelector('.article-table').classList.remove('hidden');
-		searchTable.element.classList.add('hidden');
-		return;
-	}
-
-	if (query.length < 3) return;
-
-	clearTimeout(searchTimeout);
-
-	searchTimeout = setTimeout(async () => {
-		search(e.target.value);
-		searchTimeout = null;
-	}, 400);
-});
-
 // Update the photo preview modal when attribute changes
 const mutationObserver = new MutationObserver((mutationsList, observer) => {
 	for (const mutation of mutationsList) {
@@ -299,10 +248,3 @@ const mutationObserver = new MutationObserver((mutationsList, observer) => {
 });
 
 mutationObserver.observe(document.getElementById('article-item-photo'), { attributes: true, attributeFilter: ['data-url'], attributeOldValue: true });
-
-const formatDate = (date) => {
-	const month = new Intl.DateTimeFormat('nl-BE', { month: 'short' }).format(date);
-	return `${new Intl.DateTimeFormat('nl-BE', { day: '2-digit' }).format(date)} ${month.charAt(0).toUpperCase() + month.slice(1)} ${new Intl.DateTimeFormat('nl-BE', {
-		year: 'numeric',
-	}).format(date)}`;
-};

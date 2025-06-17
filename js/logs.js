@@ -9,7 +9,7 @@ let globalToken;
 const filterCollectionSelect = new Select(document.getElementById('logs-collection').nextElementSibling, document.getElementById('logs-collection'));
 const modal = new Modal(document.getElementById('log-details-modal'), null);
 const page = window.location.search.includes('page=') ? window.location.search.split('page=')[1].split('&')[0] : 0;
-const count = window.location.search.includes('count=') ? window.location.search.split('count=')[1].split('&')[0] : 50;
+const count = window.location.search.includes('size=') ? window.location.search.split('size=')[1].split('&')[0] : 50;
 const collection = window.location.search.includes('collection=') ? window.location.search.split('collection=')[1].split('&')[0] : 'all';
 const fromDate = window.location.search.includes('startTime=') ? window.location.search.split('startTime=')[1].split('&')[0] : null;
 const toDate = window.location.search.includes('endTime=') ? window.location.search.split('endTime=')[1].split('&')[0] : null;
@@ -102,7 +102,7 @@ function updateTable(page, count = 50, collection = 'all', fromDate = null, toDa
 	document.querySelector('.loader').classList.remove('close');
 
 	getRequest(
-		`/api/logs?page=${page}&count=${count}&collection=${collection}&startTime=${fromDate}&endTime=${toDate}`,
+		`/api/logs?page=${page}&size=${count}&collection=${collection}&startTime=${fromDate}&endTime=${toDate}`,
 		{ 'Content-Type': 'application/json', Authorization: 'Bearer ' + globalToken },
 		false
 	)
@@ -157,7 +157,7 @@ function updateTable(page, count = 50, collection = 'all', fromDate = null, toDa
 					total: data.data.totalCount,
 					hasAllData: data.data.totalCount == data.data.logs.length,
 					dataRetriever: async (page, limit) => {
-						const data = await getRequest(`/api/logs/get?page=${page}&count=${limit}&collection=${collection}&startTime=${fromDate}&endTime=${toDate}`, {
+						const data = await getRequest(`/api/logs?page=${page}&size=${limit}&collection=${collection}&startTime=${fromDate}&endTime=${toDate}`, {
 							'Content-Type': 'application/json',
 							Authorization: 'Bearer ' + globalToken,
 						});

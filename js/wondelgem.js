@@ -10,7 +10,7 @@ import Popover from '../modules/Popover.js';
 import Table from '../modules/Table.js';
 
 const page = window.location.search.includes('page=') ? window.location.search.split('page=')[1].split('&')[0] : 0;
-const count = window.location.search.includes('count=') ? window.location.search.split('count=')[1].split('&')[0] : 50;
+const count = window.location.search.includes('count=') ? window.location.search.split('count=')[1].split('&')[0] : 10;
 
 Auth.getUser()
 	.then((data) => {
@@ -101,7 +101,7 @@ async function main(token, page = 0, count = 50) {
 		],
 		rowAttributes: { 'data-id': 'RawData.ID' },
 		onRowClick: (data) => openArchiveItemDrawer(data.RawData),
-		hasWrapper: true,
+		hasWrapper: false,
 		noDataMessage: 'Geen archief items gevonden',
 		searchElement: document.querySelector('.search'),
 		selectable: true,
@@ -117,7 +117,7 @@ async function main(token, page = 0, count = 50) {
 		],
 		pagination: {
 			enabled: true,
-			count: count,
+			limit: count,
 			page: page,
 			showMore: true,
 			total: archiveTotalArticles,

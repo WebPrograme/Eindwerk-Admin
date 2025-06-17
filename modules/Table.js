@@ -14,6 +14,8 @@ export default class Table {
 			columnToggle = { enabled: false, dropdownClass: null, columns: [], defaultColumns: [] },
 			rowAttributes = {},
 			searchElement = null,
+			selectable = false,
+			selectButtons = null,
 		}
 	) {
 		this.element = element;
@@ -29,6 +31,8 @@ export default class Table {
 		this.columnToggle = columnToggle;
 		this.rowAttributes = rowAttributes;
 		this.searchElement = searchElement;
+		this.selectable = selectable;
+		this.selectButtons = selectButtons;
 
 		if (this.hasPagination) {
 			this.currentPage = pagination.page || 0;
@@ -69,6 +73,7 @@ export default class Table {
 			if (this.hasPagination) this.createPagination();
 			if (this.hasMore && !this.hasAllData) this.createMore();
 		} else {
+			const colspan = this.columns.length + (this.selectable ? 1 : 0);
 			this.element.querySelector(
 				'table'
 			).innerHTML += `<tbody><tr class="table-empty"><td colspan="${this.columns.length}" class="text-center">${this.noDataMessage}</td></tr></tbody>`;
@@ -86,12 +91,54 @@ export default class Table {
 			});
 		}
 
+		// If the table is selectable, add the select header
+		if (this.selectable) {
+			this.createSelectHeader();
+		}
+
 		lucide.createIcons();
+	}
+
+	createSelectHeader() {
+		const selectHeader = document.createElement('div');
+		selectHeader.classList.add('table-select-header');
+		selectHeader.innerHTML = `<p class="table-select-header-text"><span class="table-selected-count">0</span> items geselecteerd</p>`;
+
+		this.selectButtons.forEach((button) => {
+			const btn = document.createElement('button');
+			btn.classList.add(...button.classes);
+			btn.innerHTML = button.text;
+			btn.addEventListener('click', () => {
+				button.onClick(this.getSelectedRows());
+			});
+
+			selectHeader.appendChild(btn);
+		});
+
+		this.selectHeader = selectHeader;
+		this.element.insertBefore(selectHeader, this.element.firstChild);
 	}
 
 	createHeader() {
 		const thead = document.createElement('thead');
 		const tr = document.createElement('tr');
+
+		// Add a checkbox to the header if the table is selectable
+		if (this.selectable) {
+			const th = document.createElement('th');
+			th.innerHTML = '<input type="checkbox" class="table-checkbox">';
+			th.classList.add('table-column-select', 'text-center');
+			th.addEventListener('click', (e) => {
+				const checkboxes = Array.from(this.element.querySelectorAll('table tbody td:first-child input[type="checkbox"]'));
+				checkboxes.forEach((checkbox) => {
+					checkbox.checked = e.currentTarget.querySelector('input[type="checkbox"]').checked;
+				});
+
+				if (this.onSelect) this.onSelect(this.getSelectedRows());
+			});
+
+			tr.appendChild(th);
+		}
 
 		if (this.columns.length === 0) {
 			Object.keys(this.data[0]).forEach((key) => {
@@ -127,7 +174,7 @@ export default class Table {
 				}
 
 				// Text alignment
-				const type = column.type || typeof this.data[0][column.key];
+				const type = column.type || this.data[0] !== undefined ? typeof this.data[0][column.key] : 'string';
 				const isNumber = type === 'number' || type === 'bigint';
 				const textAlign = isNumber ? 'text-right' : 'text-left';
 
@@ -177,8 +224,28 @@ export default class Table {
 			});
 		}
 
+		// Add a checkbox to the row if the table is selectable
+		if (this.selectable) {
+			const td = document.createElement('td');
+			td.innerHTML = '<input type="checkbox" class="table-checkbox">';
+			td.classList.add('table-column-select');
+			td.addEventListener('click', (e) => {
+				e.stopPropagation();
+
+				if (this.onSelect) this.onSelect(this.getSelectedRows());
+			});
+			tr.appendChild(td);
+		}
+
+		// Add attributes to the row
 		Object.keys(this.rowAttributes).forEach((key) => {
-			tr.setAttribute(key, row[this.rowAttributes[key]]);
+			const path = this.rowAttributes[key].split('.');
+			let value = row;
+			path.forEach((p) => {
+				value = value[p];
+			});
+
+			tr.setAttribute(key, value);
 		});
 
 		const fragment = document.createDocumentFragment();
@@ -208,6 +275,14 @@ export default class Table {
 				const td = document.createElement('td');
 				td.classList.add(column.center ? 'text-center' : textAlign);
 				td.innerHTML = endValue;
+
+				if (column.classes) {
+					if (typeof column.classes === 'string') {
+						td.classList.add(column.classes);
+					} else {
+						td.classList.add(...column.classes);
+					}
+				}
 
 				if (column.sortable && column.valueResolver) {
 					td.dataset.rawValue = row[column.key];
@@ -243,10 +318,13 @@ export default class Table {
 		prev.innerHTML = '<i data-lucide="chevron-left"></i>';
 		prev.addEventListener('click', () => {
 			this.currentPage--;
-			if (this.prevCallback) {
-				this.prevCallback(this.currentPage, this.pagination.limit);
-			} else if (this.currentPage > 0) {
-				this.updateData(this.currentPage, this.pagination.limit);
+			this.updateData(this.currentPage, this.pagination.limit);
+
+			if (this.saveInUrl) {
+				const url = new URL(window.location.href);
+				url.searchParams.set('page', this.currentPage);
+				url.searchParams.set('count', this.pagination.limit);
+				window.history.pushState({}, '', url);
 			}
 		});
 
@@ -257,10 +335,13 @@ export default class Table {
 
 		next.addEventListener('click', () => {
 			this.currentPage++;
-			if (this.nextCallback) {
-				this.nextCallback(this.currentPage, this.pagination.limit);
-			} else if (this.currentPage < this.total / this.pagination.limit - 1) {
-				this.updateData(this.currentPage, this.pagination.limit);
+			this.updateData(this.currentPage, this.pagination.limit);
+
+			if (this.saveInUrl) {
+				const url = new URL(window.location.href);
+				url.searchParams.set('page', this.currentPage);
+				url.searchParams.set('count', this.pagination.limit);
+				window.history.pushState({}, '', url);
 			}
 		});
 
@@ -382,9 +463,8 @@ export default class Table {
 		this.columns[columnIndex].default = !this.columns[columnIndex].default;
 	}
 
-	getColumnIndex(value, type = 'key') {
-		if (type === 'key') return this.columns.findIndex((column) => column.key === value);
-		else if (type === 'title') return this.columns.findIndex((column) => column.title === value);
+	getColumnIndex(key) {
+		return this.columns.findIndex((column) => column.key === key) + (this.selectable ? 1 : 0);
 	}
 
 	async updateData(page, limit) {
@@ -432,5 +512,23 @@ export default class Table {
 		});
 
 		if (lastVisibleRow) lastVisibleRow.classList.add('hide-border');
+	}
+
+	onSelect(selectedRows) {
+		if (selectedRows.length > 0) {
+			this.selectHeader.querySelector('.table-selected-count').innerHTML = selectedRows.length;
+			this.selectHeader.classList.add('active');
+		} else {
+			this.selectHeader.classList.remove('active');
+		}
+	}
+
+	getSelectedRows() {
+		return Array.from(this.element.querySelectorAll('table tbody td:first-child input[type="checkbox"]:checked')).map((checkbox) => checkbox.closest('tr'));
+	}
+
+	refresh(data) {
+		this.data = data;
+		this.init();
 	}
 }
