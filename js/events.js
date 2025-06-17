@@ -20,6 +20,7 @@ Auth.getUser()
 	});
 
 let eventFile = null;
+let totalevents = 0;
 
 const deleteEventModal = new Modal(document.getElementById('delete-event-modal'), document.querySelector('.event-item-delete'), false, false);
 const photoPreviewModal = new Modal(document.getElementById('photo-preview-modal'), document.querySelector('.photo-preview-trigger'));

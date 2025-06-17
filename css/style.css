@@ -2168,6 +2168,7 @@ td:has(.table-delete, .table-checkbox) {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+    gap: 1rem;
     justify-content: space-between;
     min-width: -webkit-fill-available;
     margin-bottom: 1rem;
@@ -2178,13 +2179,14 @@ td:has(.table-delete, .table-checkbox) {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+    min-width: 350px;
     max-width: 100%;
-    width: -webkit-fill-available;
+    flex: 1 0 calc(50% - 2rem);
 }
 
 .table-actions>.table-actions-date {
     position: relative;
-    gap: 2rem 3rem;
+    gap: 2rem;
 }
 
 .table-actions>.table-actions-date::before {

@@ -6,3 +6,15 @@
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+#logs-collection-select {
+    flex: 1 0 35%;
+}
+
+#logs-date-select {
+    flex: 1 0 40%;
+}
+
+#logs-search-button {
+    flex: 1;
+}

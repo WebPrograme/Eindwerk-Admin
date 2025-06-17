@@ -3,11 +3,16 @@ import { getRequest, postRequest } from '../modules/Requests.js';
 import Table from '../modules/Table.js';
 import Popover from '../modules/Popover.js';
 import Modal from '../modules/Modal.js';
+import Select from '../modules/Select.js';
 
 let globalToken;
+const filterCollectionSelect = new Select(document.getElementById('logs-collection').nextElementSibling, document.getElementById('logs-collection'));
 const modal = new Modal(document.getElementById('log-details-modal'), null);
 const page = window.location.search.includes('page=') ? window.location.search.split('page=')[1].split('&')[0] : 0;
 const count = window.location.search.includes('count=') ? window.location.search.split('count=')[1].split('&')[0] : 50;
+const collection = window.location.search.includes('collection=') ? window.location.search.split('collection=')[1].split('&')[0] : 'all';
+const fromDate = window.location.search.includes('startTime=') ? window.location.search.split('startTime=')[1].split('&')[0] : null;
+const toDate = window.location.search.includes('endTime=') ? window.location.search.split('endTime=')[1].split('&')[0] : null;
 const icons = {
 	'Archief Artikel Toegevoegd': 'plus',
 	'Archief Artikel Bijgewerkt': 'pencil',
@@ -26,13 +31,33 @@ const icons = {
 	'Publicatie Verwijderd': 'trash',
 };
 
+// Initialize the filters
+if (collection !== 'all') {
+	filterCollectionSelect.setValue(collection);
+} else {
+	filterCollectionSelect.setValue('all');
+}
+
+// Set the date filters if they exist in the URL
+if (fromDate) {
+	document.getElementById('logs-from-date').setAttribute('value', fromDate);
+	document.getElementById('logs-from-date').value = fromDate;
+	document.getElementById('logs-from-date').style.setProperty('--date-value', `"${fromDate.split('-')[2]}/${fromDate.split('-')[1]}/${fromDate.split('-')[0]}"`);
+}
+
+if (toDate) {
+	document.getElementById('logs-to-date').setAttribute('value', toDate);
+	document.getElementById('logs-to-date').value = toDate;
+	document.getElementById('logs-to-date').style.setProperty('--date-value', `"${toDate.split('-')[2]}/${toDate.split('-')[1]}/${toDate.split('-')[0]}"`);
+}
+
 Auth.getUser()
 	.then((data) => {
 		document.querySelector('.sidebar .sidebar-profile-img').src = data.photoURL;
 		document.querySelector('.sidebar .sidebar-profile-name').innerHTML = data.displayName;
 
 		globalToken = data['stsTokenManager']['accessToken'];
-		main(page);
+		main(page, count, collection, fromDate, toDate);
 	})
 	.catch((error) => {
 		alert(error);
@@ -73,10 +98,14 @@ function openLogDetails(log) {
 	modal.open();
 }
 
-function updateTable(page) {
+function updateTable(page, count = 50, collection = 'all', fromDate = null, toDate = null) {
 	document.querySelector('.loader').classList.remove('close');
 
-	getRequest(`/api/logs/all?page=${page}`, { 'Content-Type': 'application/json', Authorization: 'Bearer ' + globalToken }, false)
+	getRequest(
+		`/api/logs?page=${page}&count=${count}&collection=${collection}&startTime=${fromDate}&endTime=${toDate}`,
+		{ 'Content-Type': 'application/json', Authorization: 'Bearer ' + globalToken },
+		false
+	)
 		.then((data) => {
 			new Table(document.getElementById('logs-table'), {
 				data: Object.values(data.data.logs).map((item) => {
@@ -110,7 +139,8 @@ function updateTable(page) {
 									second: '2-digit',
 								}).format(date) +
 								' (' +
-								new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(date).find((part) => part.type === 'timeZoneName').value +
+								(new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(date).find((part) => part.type === 'timeZoneName') || { value: '' })
+									.value +
 								')'
 							);
 						},
@@ -127,7 +157,10 @@ function updateTable(page) {
 					total: data.data.totalCount,
 					hasAllData: data.data.totalCount == data.data.logs.length,
 					dataRetriever: async (page, limit) => {
-						const data = await getRequest(`/api/logs/get/all?page=${page}`, { 'Content-Type': 'application/json', Authorization: 'Bearer ' + globalToken }, false);
+						const data = await getRequest(`/api/logs/get?page=${page}&count=${limit}&collection=${collection}&startTime=${fromDate}&endTime=${toDate}`, {
+							'Content-Type': 'application/json',
+							Authorization: 'Bearer ' + globalToken,
+						});
 						return Object.values(data.data.logs).map((item) => {
 							return {
 								id: item.id,
@@ -170,8 +203,26 @@ function updateTable(page) {
 		});
 }
 
+// Event listener for filter
+document.getElementById('logs-search-button').addEventListener('click', () => {
+	const collection = filterCollectionSelect.getValue();
+	const fromDate = document.getElementById('logs-from-date').value;
+	const toDate = document.getElementById('logs-to-date').value;
+
+	// Update the URL with the new parameters
+	const url = new URL(window.location.href);
+	url.searchParams.set('collection', collection);
+
+	if (fromDate) url.searchParams.set('startTime', fromDate);
+	if (toDate) url.searchParams.set('endTime', toDate);
+	window.history.pushState({}, '', url);
+
+	// Update the table with the new filters
+	updateTable(page, count, collection, fromDate, toDate);
+});
+
 // Main function
-async function main(page) {
+async function main(page, count = 50, collection = 'all', fromDate = null, toDate = null) {
 	// Update the table with the logs data
-	updateTable(page);
+	updateTable(page, count, collection, fromDate, toDate);
 }
