@@ -1,3 +1,5 @@
+import Dropdown from './Dropdown.js';
+
 export default class Table {
 	constructor(
 		element,
@@ -6,22 +8,12 @@ export default class Table {
 			columns = [],
 			noDataMessage = 'No data available',
 			onRowClick,
-			hasWrapper = true,
-			pagination = {
-				enabled: false,
-				count: 10,
-				page: 0,
-				showMore: false,
-				hasAllData: false,
-				dataRetriever: null,
-				total: data.length,
-				saveInUrl: false,
-			},
+			hasWrapper = false,
+			pagination = { enabled: false, limit: 10, page: 0, hasAllData: false, dataRetriever: null, total: data.length, prevCallback: null, nextCallback: null },
+			more = { enabled: false, limit: 10, page: 0, hasAllData: false, dataRetriever: null, total: data.length },
+			columnToggle = { enabled: false, dropdownClass: null, columns: [], defaultColumns: [] },
 			rowAttributes = {},
 			searchElement = null,
-			selectable = false,
-			selectButtons = null,
-			fixed = false,
 		}
 	) {
 		this.element = element;
@@ -31,31 +23,41 @@ export default class Table {
 		this.onRowClick = onRowClick;
 		this.hasWrapper = hasWrapper;
 		this.pagination = pagination;
-		this.hasPagination = this.pagination.enabled;
-		this.hasAllData = this.pagination.hasAllData;
-		this.currentPage = this.pagination.page;
-		this.total = this.pagination.total;
-		this.dataRetriever = this.pagination.dataRetriever;
-		this.saveInUrl = this.pagination.saveInUrl;
+		this.hasPagination = pagination.enabled;
+		this.more = more;
+		this.hasMore = more.enabled;
+		this.columnToggle = columnToggle;
 		this.rowAttributes = rowAttributes;
 		this.searchElement = searchElement;
-		this.selectable = selectable;
-		this.selectButtons = selectButtons;
-		this.fixed = fixed;
+
+		if (this.hasPagination) {
+			this.currentPage = pagination.page || 0;
+			this.total = pagination.total || data.length;
+			this.hasAllData = pagination.hasAllData || false;
+			this.prevCallback = pagination.prevCallback || null;
+			this.nextCallback = pagination.nextCallback || null;
+		} else if (this.hasMore) {
+			this.currentPage = more.page || 0;
+			this.total = more.total || data.length;
+			this.hasAllData = more.hasAllData || false;
+		}
 
 		this.init();
 	}
 
 	init() {
-		this.element.innerHTML = `${this.hasWrapper ? '<div class="table-wrapper">' : ''}<table class="table"></table>${this.hasWrapper ? '</div>' : ''}`;
+		this.element.innerHTML = `${!this.hasWrapper ? '<div class="table-wrapper">' : ''}<table class="table"></table>${!this.hasWrapper ? '</div>' : ''}`;
 		this.createHeader();
 
+		// Check and update if necessary the hasAllData property
+		if (this.hasPagination || this.hasMore) this.hasAllData = this.total === this.data.length;
+
 		if (this.data.length > 0) {
-			const count = this.pagination.count || this.data.length;
+			const limit = this.pagination.limit || this.data.length;
 
 			if (this.hasPagination && this.hasAllData) {
-				const data = this.data.slice(this.currentPage * count, (this.currentPage + 1) * count);
-				data.forEach((row) => {
+				const slicedData = this.data.slice(this.currentPage * limit, (this.currentPage + 1) * limit);
+				slicedData.forEach((row) => {
 					this.addRow(row);
 				});
 			} else {
@@ -64,24 +66,12 @@ export default class Table {
 				});
 			}
 
-			// Default sorting to the first column that is sortable
-			const defaultSort = this.columns.find((column) => column.sortable);
-			if (defaultSort) {
-				this.sortColumn(defaultSort.key, this.element.querySelector(`table thead th[data-key="${defaultSort.key}"]`));
-			}
-
-			if (this.hasPagination && !this.pagination.showMore) {
-				this.createPagination();
-			} else if (this.hasPagination && this.pagination.showMore) {
-				this.createShowMore();
-			}
-
-			if (this.fixed) {
-				this.element.querySelector('table').classList.add('table-fixed');
-			}
+			if (this.hasPagination) this.createPagination();
+			if (this.hasMore && !this.hasAllData) this.createMore();
 		} else {
-			const colspan = this.columns.length + (this.selectable ? 1 : 0);
-			this.element.querySelector('table').innerHTML += `<tbody><tr><td colspan="${colspan}" class="text-center">${this.noDataMessage}</td></tr></tbody>`;
+			this.element.querySelector(
+				'table'
+			).innerHTML += `<tbody><tr class="table-empty"><td colspan="${this.columns.length}" class="text-center">${this.noDataMessage}</td></tr></tbody>`;
 		}
 
 		if (this.searchElement) {
@@ -96,76 +86,82 @@ export default class Table {
 			});
 		}
 
-		// If the table is selectable and has a wrapper, add the select header
-		if (this.selectable && this.hasWrapper) {
-			this.createSelectHeader();
-		}
-
 		lucide.createIcons();
-	}
-
-	createSelectHeader() {
-		const selectHeader = document.createElement('div');
-		selectHeader.classList.add('table-select-header');
-		selectHeader.innerHTML = `<p class="table-select-header-text"><span class="table-selected-count">0</span> items geselecteerd</p>`;
-
-		this.selectButtons.forEach((button) => {
-			const btn = document.createElement('button');
-			btn.classList.add(...button.classes);
-			btn.innerHTML = button.text;
-			btn.addEventListener('click', () => {
-				button.onClick(this.getSelectedRows());
-			});
-
-			selectHeader.appendChild(btn);
-		});
-
-		this.selectHeader = selectHeader;
-		this.element.insertBefore(selectHeader, this.element.firstChild);
 	}
 
 	createHeader() {
 		const thead = document.createElement('thead');
 		const tr = document.createElement('tr');
 
-		// Add a checkbox to the header if the table is selectable
-		if (this.selectable) {
-			const th = document.createElement('th');
-			th.innerHTML = '<input type="checkbox" class="table-checkbox">';
-			th.classList.add('table-column-select', 'text-center');
-			th.addEventListener('click', (e) => {
-				const checkboxes = Array.from(this.element.querySelectorAll('table tbody td:first-child input[type="checkbox"]'));
-				checkboxes.forEach((checkbox) => {
-					checkbox.checked = e.currentTarget.querySelector('input[type="checkbox"]').checked;
+		if (this.columns.length === 0) {
+			Object.keys(this.data[0]).forEach((key) => {
+				// Text alignment
+				const type = typeof this.data[0][key];
+				const isNumber = type === 'number' || type === 'bigint';
+				const textAlign = isNumber ? 'text-right' : 'text-left';
+
+				const th = document.createElement('th');
+				th.innerHTML = key;
+				th.classList.add('table-column');
+				th.classList.add('column-string');
+				th.classList.add(textAlign);
+				tr.appendChild(th);
+			});
+		} else {
+			this.columns.forEach((column, index) => {
+				// Add column toggle
+				column.default = column.default === undefined ? true : column.default;
+				if (this.columnToggle.enabled) {
+					if (this.columnToggle.saveState) {
+						const savedState = localStorage.getItem(this.columnToggle.saveStateKey) ? JSON.parse(localStorage.getItem(this.columnToggle.saveStateKey)) : {};
+						if (savedState[column.key] !== undefined) {
+							column.default = savedState[column.key];
+						}
+					}
+
+					if (this.columnToggle.dropdownClass.dropdownItemsTitles && !this.columnToggle.dropdownClass.dropdownItemsTitles.includes(column.title)) {
+						this.columnToggle.dropdownClass.createDropdownItem(column.title, column.title, { icon: false, disabled: false, checkbox: true, checked: column.default });
+					} else if (!this.columnToggle.dropdownClass.dropdownItemsTitles) {
+						this.columnToggle.dropdownClass.createDropdownItem(column.title, column.title, { icon: false, disabled: false, checkbox: true, checked: column.default });
+					}
+				}
+
+				// Text alignment
+				const type = column.type || typeof this.data[0][column.key];
+				const isNumber = type === 'number' || type === 'bigint';
+				const textAlign = isNumber ? 'text-right' : 'text-left';
+
+				// Add column to table
+				const th = document.createElement('th');
+				th.innerHTML = column.title;
+				th.dataset.key = column.key;
+				th.dataset.sortable = column.sortable && !this.hasPagination ? 'true' : 'false';
+				th.dataset.type = column.type || 'string';
+				th.classList.add(column.sortable && !this.hasPagination ? 'table-column-sortable' : 'table-column');
+				th.classList.add(column.type && column.type === 'date' ? 'column-date' : 'column-string');
+				th.classList.add(column.center ? 'text-center' : textAlign);
+				th.addEventListener('click', (header) => {
+					if (!column.sortable || this.hasPagination) return;
+					this.sortColumn(column.key, header.currentTarget);
 				});
 
-				if (this.onSelect) this.onSelect(this.getSelectedRows());
-			});
+				if (this.columnToggle.enabled && !column.default) {
+					th.classList.add('hidden');
+				}
 
-			tr.appendChild(th);
+				tr.appendChild(th);
+			});
 		}
 
-		// Add the columns to the header
-		this.columns.forEach((column) => {
-			const th = document.createElement('th');
-			th.innerHTML = column.title;
-			th.dataset.key = column.key;
-			th.dataset.sortable = column.sortable && !this.hasPagination ? 'true' : 'false';
-			th.dataset.type = column.type || 'string';
-			th.classList.add(column.sortable && !this.hasPagination ? 'table-column-sortable' : 'table-column');
-			th.classList.add(column.type && column.type === 'date' ? 'column-date' : 'column-string');
-			th.classList.add(column.center ? 'text-center' : 'text-left');
+		if (this.columnToggle.enabled) {
+			this.columnToggle.dropdownClass.callback = (title) => {
+				this.toggleColumn(title);
+			};
 
-			if (column.width) th.style.width = column.width;
-			if (column.minWidth) th.style.minWidth = column.minWidth;
-
-			th.addEventListener('click', (header) => {
-				if (!column.sortable || this.hasPagination) return;
-				this.sortColumn(column.key, header.currentTarget);
-			});
-
-			tr.appendChild(th);
-		});
+			// Add button to toggle columns
+			this.columnToggle.dropdownClass.createDropdownCloseButton('Opslaan');
+			this.columnToggle.dropdownClass.init();
+		}
 
 		thead.appendChild(tr);
 		this.element.querySelector('table').appendChild(thead);
@@ -181,103 +177,97 @@ export default class Table {
 			});
 		}
 
-		// Add attributes to the row
 		Object.keys(this.rowAttributes).forEach((key) => {
-			const path = this.rowAttributes[key].split('.');
-			let value = row;
-			path.forEach((p) => {
-				value = value[p];
-			});
-
-			tr.setAttribute(key, value);
+			tr.setAttribute(key, row[this.rowAttributes[key]]);
 		});
 
-		// Add a checkbox to the row if the table is selectable
-		if (this.selectable) {
-			const td = document.createElement('td');
-			td.innerHTML = '<input type="checkbox" class="table-checkbox">';
-			td.classList.add('table-column-select');
-			td.addEventListener('click', (e) => {
-				e.stopPropagation();
+		const fragment = document.createDocumentFragment();
 
-				if (this.onSelect) this.onSelect(this.getSelectedRows());
+		if (this.columns.length === 0) {
+			Object.keys(row).forEach((key) => {
+				// Text alignment
+				const type = typeof row[key];
+				const isNumber = type === 'number' || type === 'bigint';
+				const textAlign = isNumber ? 'text-right' : 'text-left';
+
+				const td = document.createElement('td');
+				td.innerHTML = row[key];
+				td.classList.add(textAlign);
+				fragment.appendChild(td);
 			});
-			tr.appendChild(td);
+		} else {
+			this.columns.forEach((column) => {
+				column.default = column.default === undefined ? true : column.default;
+				const endValue = column.valueResolver ? column.valueResolver(row[column.key]) : row[column.key];
+
+				// Text alignment
+				const type = column.type || typeof endValue;
+				const isNumber = type === 'number' || type === 'bigint';
+				const textAlign = isNumber ? 'text-right' : 'text-left';
+
+				const td = document.createElement('td');
+				td.classList.add(column.center ? 'text-center' : textAlign);
+				td.innerHTML = endValue;
+
+				if (column.sortable && column.valueResolver) {
+					td.dataset.rawValue = row[column.key];
+				} else if (column.sortable) {
+					td.dataset.rawValue = endValue;
+				}
+
+				if (column.onCellClick) {
+					td.addEventListener('click', () => {});
+				}
+
+				if (this.columnToggle.enabled && !column.default) {
+					td.classList.add('hidden');
+				}
+
+				fragment.appendChild(td);
+			});
 		}
 
-		// Add the columns to the row
-		this.columns.forEach((column) => {
-			const td = document.createElement('td');
-			td.innerHTML = column.valueResolver ? column.valueResolver(row[column.key]) : row[column.key];
-			td.classList.add(column.center ? 'text-center' : 'text-left');
-
-			if (column.classes) {
-				if (typeof column.classes === 'string') {
-					td.classList.add(column.classes);
-				} else {
-					td.classList.add(...column.classes);
-				}
-			}
-
-			if (column.sortable && column.valueResolver) {
-				td.dataset.rawValue = row[column.key];
-			} else if (column.sortable) {
-				td.dataset.rawValue = td.innerHTML;
-			}
-			td.addEventListener('click', () => {
-				if (column.onCellClick) {
-					column.onCellClick(td);
-				}
-			});
-			tr.appendChild(td);
-		});
-
-		tr.style.setProperty('width', this.element.querySelector('table').offsetWidth + 'px');
-
+		tr.appendChild(fragment);
 		tbody.appendChild(tr);
-		this.element.querySelector('table').appendChild(tbody);
+		if (!this.element.querySelector('table tbody')) {
+			this.element.querySelector('table').appendChild(tbody);
+		}
 	}
 
 	createPagination() {
 		const pagination = document.createElement('div');
-		pagination.classList.add('table-footer');
+		pagination.classList.add('table-footer', 'table-footer-pagination');
 		const prev = document.createElement('button');
 		prev.classList.add('btn', 'btn-secondary', 'btn-only-icon', 'table-footer-prev');
 		prev.disabled = this.currentPage === 0;
 		prev.innerHTML = '<i data-lucide="chevron-left"></i>';
 		prev.addEventListener('click', () => {
 			this.currentPage--;
-			this.updateData(this.currentPage, this.pagination.count);
-
-			if (this.saveInUrl) {
-				const url = new URL(window.location.href);
-				url.searchParams.set('page', this.currentPage);
-				url.searchParams.set('count', this.pagination.count);
-				window.history.pushState({}, '', url);
+			if (this.prevCallback) {
+				this.prevCallback(this.currentPage, this.pagination.limit);
+			} else if (this.currentPage > 0) {
+				this.updateData(this.currentPage, this.pagination.limit);
 			}
 		});
 
 		const next = document.createElement('button');
 		next.classList.add('btn', 'btn-secondary', 'btn-only-icon', 'table-footer-next');
-		next.disabled = this.currentPage >= this.total / this.pagination.count - 1;
+		next.disabled = this.currentPage >= this.total / this.pagination.limit - 1;
 		next.innerHTML = '<i data-lucide="chevron-right"></i>';
 
 		next.addEventListener('click', () => {
 			this.currentPage++;
-			this.updateData(this.currentPage, this.pagination.count);
-
-			if (this.saveInUrl) {
-				const url = new URL(window.location.href);
-				url.searchParams.set('page', this.currentPage);
-				url.searchParams.set('count', this.pagination.count);
-				window.history.pushState({}, '', url);
+			if (this.nextCallback) {
+				this.nextCallback(this.currentPage, this.pagination.limit);
+			} else if (this.currentPage < this.total / this.pagination.limit - 1) {
+				this.updateData(this.currentPage, this.pagination.limit);
 			}
 		});
 
 		const page = document.createElement('h3');
 		page.classList.add('table-footer-between');
-		page.innerHTML = `${Math.min(this.currentPage * this.pagination.count, this.total)} - ${Math.min(
-			this.currentPage * this.pagination.count + this.pagination.count,
+		page.innerHTML = `${Math.min(this.currentPage * this.pagination.limit, this.total)} - ${Math.min(
+			this.currentPage * this.pagination.limit + this.pagination.limit,
 			this.total
 		)} van ${this.total}`;
 
@@ -287,42 +277,68 @@ export default class Table {
 		this.element.appendChild(pagination);
 	}
 
-	createShowMore() {
-		const showMore = document.createElement('div');
-		showMore.classList.add('table-footer', 'table-footer-show-more');
-		const button = document.createElement('button');
-		button.classList.add('btn', 'btn-secondary');
-		button.innerHTML = 'Laad Meer';
-		button.addEventListener('click', () => {
-			this.currentPage++;
-			this.appendData(this.currentPage, this.pagination.count);
+	// Create a "more" button to load more data
+	// Oppposite of pagination, this will add more data to the table instead of replacing it
+	createMore() {
+		const tablefooter = document.createElement('div');
+		tablefooter.classList.add('table-footer', 'table-footer-more');
 
-			if (this.saveInUrl) {
-				const url = new URL(window.location.href);
-				url.searchParams.set('page', '0');
-				url.searchParams.set('count', this.pagination.count * (this.currentPage + 1));
-				window.history.pushState({}, '', url);
+		const progress = document.createElement('div');
+		progress.classList.add('table-footer-progress');
+		progress.innerHTML = `<div class="table-footer-progress-text"><span id="table-footer-progress-current">${
+			this.more.limit * (this.currentPage + 1) > this.more.total ? this.more.total : this.more.limit * (this.currentPage + 1)
+		}</span> - <span id="table-footer-progress-total">${this.more.total}</span></div><div class="table-footer-progress-bar" style="--progress: ${
+			((this.more.limit * (this.currentPage + 1)) / this.more.total) * 100
+		}%;"><div class="table-footer-progress-bar-fill" style="width: var(--progress);"></div></div>`;
+
+		tablefooter.appendChild(progress);
+
+		const more = document.createElement('a');
+		more.classList.add('btn', 'btn-secondary', 'table-footer-more-btn');
+		more.innerHTML = 'Meer laden';
+
+		tablefooter.appendChild(more);
+		this.element.appendChild(tablefooter);
+
+		more.addEventListener('click', () => {
+			this.currentPage++;
+
+			// Disable the button
+			more.classList.add('disabled');
+			more.innerHTML = 'Laden...';
+
+			if (this.currentPage < this.total / this.more.limit) {
+				this.updateData(this.currentPage, this.more.limit).then(() => {
+					more.classList.remove('disabled');
+					more.innerHTML = 'Meer laden';
+				});
+
+				// Update the progress bar
+				const progress = this.element.querySelector('.table-footer-progress-bar');
+				const current = this.element.querySelector('#table-footer-progress-current');
+				const total = this.element.querySelector('#table-footer-progress-total');
+
+				const progressValue = ((this.more.limit * (this.currentPage + 1)) / this.more.total) * 100;
+				progress.style.setProperty('--progress', `${progressValue}%`);
+				current.innerHTML = `${Math.min(this.more.limit * (this.currentPage + 1), this.more.total)}`;
+				total.innerHTML = `${this.more.total}`;
 			}
 		});
-
-		if (this.data.length >= this.pagination.total) {
-			showMore.style.display = 'none';
-		}
-
-		showMore.appendChild(button);
-		this.element.appendChild(showMore);
 	}
 
 	sortColumn(key, header) {
-		const direction = header.dataset.direction === 'desc' ? 'asc' : 'desc';
+		const direction = header.dataset.direction === 'asc' ? 'desc' : 'asc';
 		const math = direction === 'asc' ? -1 : 1;
 		const column = this.columns.find((column) => column.key === key);
 		const type = column.type || 'string';
 		const rows = Array.from(this.element.querySelector('table tbody').querySelectorAll('tr'));
 
 		rows.sort((a, b) => {
-			const valueA = a.querySelector(`td:nth-child(${this.getColumnIndex(key) + 1})`).dataset.rawValue;
-			const valueB = b.querySelector(`td:nth-child(${this.getColumnIndex(key) + 1})`).dataset.rawValue;
+			let valueA = a.querySelector(`td:nth-child(${this.getColumnIndex(key) + 1})`).dataset.rawValue;
+			let valueB = b.querySelector(`td:nth-child(${this.getColumnIndex(key) + 1})`).dataset.rawValue;
+
+			valueA = valueA !== undefined && valueA !== null ? valueA : '';
+			valueB = valueB !== undefined && valueB !== null ? valueB : '';
 
 			if (type === 'number') {
 				return column.sortable ? (valueA - valueB) * math : 0;
@@ -347,26 +363,56 @@ export default class Table {
 		});
 	}
 
-	getColumnIndex(key) {
-		return this.columns.findIndex((column) => column.key === key) + (this.selectable ? 1 : 0);
+	toggleColumn(title) {
+		const columnIndex = this.getColumnIndex(title, 'title');
+		const th = this.element.querySelector(`table thead th:nth-child(${columnIndex + 1})`);
+		const rows = Array.from(this.element.querySelectorAll('table tbody tr:not(.table-empty)'));
+
+		th.classList.toggle('hidden');
+		rows.forEach((row) => {
+			row.querySelector(`td:nth-child(${columnIndex + 1})`).classList.toggle('hidden');
+		});
+
+		if (this.columnToggle.saveState) {
+			const savedState = localStorage.getItem(this.columnToggle.saveStateKey) ? JSON.parse(localStorage.getItem(this.columnToggle.saveStateKey)) : {};
+			savedState[this.columns[columnIndex].key] = !this.columns[columnIndex].default;
+			localStorage.setItem(this.columnToggle.saveStateKey, JSON.stringify(savedState));
+		}
+
+		this.columns[columnIndex].default = !this.columns[columnIndex].default;
 	}
 
-	async updateData(page, count) {
-		const data = await this.pagination.dataRetriever(page, count);
-		this.data = data;
-		this.init();
+	getColumnIndex(value, type = 'key') {
+		if (type === 'key') return this.columns.findIndex((column) => column.key === value);
+		else if (type === 'title') return this.columns.findIndex((column) => column.title === value);
 	}
 
-	async appendData(page, count) {
-		const data = await this.pagination.dataRetriever(page, count);
-		this.data = [...this.data, ...data];
+	async updateData(page, limit) {
+		if (this.hasAllData) {
+			this.currentPage = page;
+			this.element.querySelector('table tbody').innerHTML = '';
+			this.data.forEach((row) => {
+				this.addRow(row);
+			});
+			return;
+		}
+
+		if (this.hasPagination) {
+			const data = await this.pagination.dataRetriever(page, limit);
+			this.data = data;
+		} else if (this.hasMore) {
+			const data = await this.more.dataRetriever(page, limit);
+			this.data.push(...data);
+			this.currentPage = page;
+		}
+
 		this.init();
 	}
 
 	search(e) {
-		console.log('searching');
 		const value = e.target.value.toLowerCase();
 		const rows = Array.from(this.element.querySelector('table tbody').querySelectorAll('tr'));
+		let lastVisibleRow = null;
 
 		rows.forEach((row) => {
 			const tds = Array.from(row.querySelectorAll('td'));
@@ -378,28 +424,13 @@ export default class Table {
 			});
 
 			if (found) {
-				row.style.display = '';
+				row.classList.remove('hidden');
+				lastVisibleRow = row;
 			} else {
-				row.style.display = 'none';
+				row.classList.add('hidden');
 			}
 		});
-	}
 
-	onSelect(selectedRows) {
-		if (selectedRows.length > 0) {
-			this.selectHeader.querySelector('.table-selected-count').innerHTML = selectedRows.length;
-			this.selectHeader.classList.add('active');
-		} else {
-			this.selectHeader.classList.remove('active');
-		}
-	}
-
-	getSelectedRows() {
-		return Array.from(this.element.querySelectorAll('table tbody td:first-child input[type="checkbox"]:checked')).map((checkbox) => checkbox.closest('tr'));
-	}
-
-	refresh(data) {
-		this.data = data;
-		this.init();
+		if (lastVisibleRow) lastVisibleRow.classList.add('hide-border');
 	}
 }

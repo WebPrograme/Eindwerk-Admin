@@ -8,7 +8,6 @@
 
 		<link rel="icon" type="image/x-icon" href="../images/logo secondary color.png" />
 		<link rel="stylesheet" href="../css/style.css" />
-		<link rel="stylesheet" href="../css/logs.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,11 +45,11 @@
 				</div>
 				<a class="sidebar-menu-item" href="wie-zijn-we.html"><i data-lucide="contact" class="sidebar-menu-item-icon"></i><span>Wie zijn we</span></a>
 				<a class="sidebar-menu-item" href="publications.html"><i data-lucide="newspaper" class="sidebar-menu-item-icon"></i><span>Publicaties</span></a>
-				<a class="sidebar-menu-item" href="newsletter.html"><i data-lucide="mails" class="sidebar-menu-item-icon"></i><span>Nieuwsbrief</span></a>
+				<a class="sidebar-menu-item active" href="newsletter.html"><i data-lucide="mails" class="sidebar-menu-item-icon"></i><span>Nieuwsbrief</span></a>
 			</div>
 
 			<div class="sidebar-menu">
-				<a class="sidebar-menu-item active" href="logs.html"><i data-lucide="scroll-text" class="sidebar-menu-item-icon"></i><span>Logs</span></a>
+				<a class="sidebar-menu-item" href="logs.html"><i data-lucide="scroll-text" class="sidebar-menu-item-icon"></i><span>Logs</span></a>
 			</div>
 		</nav>
 
@@ -63,74 +62,22 @@
 		</nav>
 
 		<div class="sidebar-overlay"></div>
-
 		<div class="loader" id="main-loader"><i data-lucide="loader-2"></i></div>
-		<div class="modal" id="log-details-modal">
-			<div class="modal-overlay"></div>
-			<div class="modal-content">
-				<div class="modal-header">
-					<h2 class="modal-title">Log details</h2>
-					<p class="modal-subtitle">Hier kan je de details van de log bekijken</p>
-				</div>
-
-				<a class="modal-close"><i class="fa-solid fa-times fa-fw"></i></a>
-
-				<div class="modal-body">
-					<div id="log-details">
-						<h4>Actie</h4>
-						<p id="log-action"></p>
-						<h4>Beschrijving</h4>
-						<p id="log-description"></p>
-						<h4>Timestamp</h4>
-						<p id="log-timestamp"></p>
-						<h4>Diepe Informatie</h4>
-						<pre id="log-deep-info"></pre>
-					</div>
-				</div>
-
-				<div class="modal-footer btn-stack">
-					<button class="btn btn-secondary btn-modal-close">Sluiten</button>
-					<button class="btn btn-primary" id="log-details-go-to-button">Ga naar</button>
-				</div>
-			</div>
-		</div>
 
 		<div class="main">
 			<div class="main-header">
-				<h1 class="main-title">Logs</h1>
-				<p class="main-subtitle">Hier kan je de logs van de website bekijken. Dit is enkel voor admins zichtbaar.</p>
+				<h1 class="main-title">Nieuwsbrief</h1>
+				<p class="main-subtitle">Hier kan je de email adressen van de nieuwsbrief beheren</p>
 			</div>
 
 			<div class="main-body">
 				<div class="table-container">
-					<label class="label mb-1" for="logs-search">Filter</label>
-					<div class="table-actions w-90">
-						<div class="input-select-container" id="logs-collection-select">
-							<input type="hidden" id="logs-collection-hidden" class="input" />
-							<button id="logs-collection" class="input input-select">Collectie</button>
-
-							<div class="input-select-options">
-								<div class="input-select-option" data-value="all">Alle logs</div>
-								<div class="input-select-option" data-value="BlogArticles">Blog Artikelen</div>
-								<div class="input-select-option" data-value="BlogEvents">Blog Evenementen</div>
-								<div class="input-select-option" data-value="ArchiveArticles">Archief Artikelen</div>
-								<div class="input-select-option" data-value="Publications">Publicaties</div>
-								<div class="input-select-option" data-value="Sections">Wie zijn we</div>
-							</div>
-						</div>
-
-						<div class="table-actions-date" id="logs-date-select">
-							<input type="date" class="input" id="logs-from-date" />
-							<input type="date" class="input" id="logs-to-date" />
-						</div>
-						<button class="btn btn-primary" id="logs-search-button">Zoeken</button>
-					</div>
-					<div id="logs-table"></div>
+					<div id="newsletter-table"></div>
 				</div>
 			</div>
 		</div>
 
 		<script type="module" src="../js/main.js"></script>
-		<script type="module" src="../js/logs.js"></script>
+		<script type="module" src="../js/newsletter.js"></script>
 	</body>
 </html>

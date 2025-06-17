@@ -2103,6 +2103,13 @@ td:has(.table-delete, .table-checkbox) {
     color: rgb(255, 71, 132);
 }
 
+.table-more {
+    font-size: 1rem;
+    color: var(--secondary-color);
+    padding: .2rem;
+    cursor: pointer;
+}
+
 .table-x {
     font-size: 1rem;
     color: var(--error-color);
@@ -2139,29 +2146,65 @@ td:has(.table-delete, .table-checkbox) {
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-.table-footer {
+.table-footer-pagination {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: .5rem 1rem;
+    padding-block: .5rem;
 }
 
-.table-footer-show-more {
-    justify-content: center;
-}
-
-.table-footer .table-footer-between {
+.table-footer-pagination .table-footer-between {
     font-size: 1rem;
     font-weight: 500;
     color: var(--primary-color);
 }
 
-.table-footer .table-footer-prev.disabled,
-.table-footer .table-footer-next.disabled,
-.table-footer .table-footer-prev:disabled,
-.table-footer .table-footer-next:disabled {
+.table-footer-pagination .table-footer-prev.disabled,
+.table-footer-pagination .table-footer-next.disabled,
+.table-footer-pagination .table-footer-prev:disabled,
+.table-footer-pagination .table-footer-next:disabled,
+.table-footer-more .table-footer-more-btn.disabled,
+.table-footer-more .table-footer-more-btn:disabled {
     color: rgb(209, 213, 219);
     pointer-events: none;
+}
+
+.table-footer-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-block: .5rem;
+}
+
+.table-footer-progress {
+    margin-bottom: .5rem;
+}
+
+.table-footer-progress .table-footer-progress-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: .25rem;
+}
+
+.table-footer-progress .table-footer-progress-bar {
+    position: relative;
+    width: 100%;
+    height: .4rem;
+    background-color: rgb(229, 231, 235);
+    border-radius: .375rem;
+}
+
+.table-footer-progress .table-footer-progress-bar .table-footer-progress-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--progress);
+    background-color: var(--primary-color);
+    border-radius: .375rem;
 }
 
 .table-actions {
