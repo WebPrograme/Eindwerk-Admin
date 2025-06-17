@@ -49,6 +49,8 @@ export const newArchiveItemInputConfig: Config = {
 					if (year) {
 						return true;
 					}
+
+					return false;
 				},
 			},
 		},
