@@ -69,7 +69,7 @@ export default class Popover {
                 ${
 					buttons.length > 0
 						? `<div class="popover-footer">
-                    ${buttons.map((button) => `<button class="btn ${button.class}">${button.text}</button>`).join('')}
+                    ${buttons.map((button) => `<a class="btn ${button.class}">${button.text}</a>`).join('')}
                 </div>`
 						: ''
 				}

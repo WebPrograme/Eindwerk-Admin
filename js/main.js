@@ -1,5 +1,6 @@
 lucide.createIcons();
 import Select from '../modules/Select.js';
+import Popover from '../modules/Popover.js';
 import Tooltip from '../modules/Tooltip.js';
 
 if (document.querySelector('.main-title')) document.title = document.title + ' - ' + document.querySelector('.main-title').innerText;
@@ -7,6 +8,22 @@ if (document.querySelector('.main-title')) document.title = document.title + ' -
 document.querySelectorAll('.btn-icon').forEach((btn) => {
 	if (!btn.innerText) btn.style.paddingRight = '.75rem';
 });
+
+// First time visit on the page, show popover
+if (!localStorage.getItem('page-first-visit')) {
+	console.log('First time visit on the archive page, showing popover');
+	new Popover(null, {
+		content: `
+			<h3>Welkom op de Admin Pagina!</h3>
+			<p>Op deze pagina kun je de website van HHKW beheren. Je kunt hier artikelen toevoegen, aanpassen en verwijderen.</p>
+			<p><strong>Let op:</strong> De server kan enkele minuten nodig hebben om op te starten na een periode van inactiviteit.</p>
+		`,
+		type: 'info',
+		noIcon: true,
+		close: true,
+	}).show();
+	localStorage.setItem('page-first-visit', 'true');
+}
 
 document.addEventListener('click', (event) => {
 	event.stopPropagation();
