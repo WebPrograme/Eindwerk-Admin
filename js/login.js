@@ -14,7 +14,7 @@ document.querySelector('.login-btn').addEventListener('click', () => {
 				if (target) {
 					window.location.href = target;
 				} else {
-					window.location.href = '/pages/wondelgem.html';
+					window.location.href = '/pages/articles.html';
 				}
 			})
 			.catch((error) => {

@@ -55,98 +55,114 @@ async function main(token, page = 0, count = 50) {
 		return;
 	}
 
-	archiveTotalArticles = data.Total;
-	document.getElementById('archive-item-last-index').innerHTML = archiveTotalArticles + 1;
+	try {
+		archiveTotalArticles = data.Total;
+		document.getElementById('archive-item-last-index').innerHTML = archiveTotalArticles + 1;
 
-	new Table(document.querySelector('.archive-table'), {
-		data: archiveItems
-			? Object.values(archiveItems).map((item) => {
-					return {
-						Order: item.Order,
-						Title: item.Title,
-						Description: item.Description['0'],
-						Date: formatDate(item.Date) || `N.v.t.`,
-						OnTimeline: item.OnTimeline,
-						HasOwnPage: item.HasOwnPage,
-						VroonhofTag: item.VroonhofTag,
-						CreatedAt: formatCreateDate(item.CreatedAt),
-						RawData: item,
-					};
-			  })
-			: [],
-		columns: [
-			{ title: '#', key: 'Order', type: 'number', center: true },
-			{ title: 'Titel', key: 'Title', classes: ['text-bold', 'archive-title'], width: '100%' },
-			{ title: 'Beschrijving', key: 'Description', classes: 'archive-description', minWidth: '200px' },
-			{
-				title: 'Tijdlijn',
-				key: 'OnTimeline',
-				valueResolver: (value) => (value ? `<i class="fa-solid fa-check fa-fw table-check"></i>` : `<i class="fa-solid fa-xmark fa-fw table-x"></i>`),
-				center: true,
-			},
-			{
-				title: 'Eigen Pagina',
-				key: 'HasOwnPage',
-				valueResolver: (value) => (value ? `<i class="fa-solid fa-check fa-fw table-check"></i>` : `<i class="fa-solid fa-xmark fa-fw table-x"></i>`),
-				center: true,
-			},
-			{
-				title: 'Vroonhof',
-				key: 'VroonhofTag',
-				valueResolver: (value) => (value ? `<i class="fa-solid fa-check fa-fw table-check"></i>` : `<i class="fa-solid fa-xmark fa-fw table-x"></i>`),
-				center: true,
-			},
-			{ title: 'Datum', key: 'Date', type: 'date' },
-			{ title: 'Aangemaakt Op', key: 'CreatedAt', type: 'date' },
-		],
-		rowAttributes: { 'data-id': 'RawData.ID' },
-		onRowClick: (data) => openArchiveItemDrawer(data.RawData),
-		hasWrapper: false,
-		noDataMessage: 'Geen archief items gevonden',
-		searchElement: document.querySelector('.search'),
-		selectable: true,
-		fixed: false,
-		selectButtons: [
-			{
-				text: 'Verwijderen',
-				classes: ['btn', 'btn-danger'],
-				onClick: (selected) => {
-					deleteArchiveModal.open();
+		new Table(document.querySelector('.archive-table'), {
+			data: archiveItems
+				? Object.values(archiveItems).map((item) => {
+						return {
+							Order: item.Order,
+							Title: item.Title,
+							Description: item.Description['0'],
+							Date: formatDate(item.Date) || `N.v.t.`,
+							OnTimeline: item.OnTimeline,
+							HasOwnPage: item.HasOwnPage,
+							VroonhofTag: item.VroonhofTag,
+							CreatedAt: formatCreateDate(item.CreatedAt),
+							RawData: item,
+						};
+				  })
+				: [],
+			columns: [
+				{ title: '#', key: 'Order', type: 'number', center: true },
+				{ title: 'Titel', key: 'Title', classes: ['text-bold', 'archive-title'], width: '100%' },
+				{ title: 'Beschrijving', key: 'Description', classes: 'archive-description', minWidth: '200px' },
+				{
+					title: 'Tijdlijn',
+					key: 'OnTimeline',
+					valueResolver: (value) => (value ? `<i class="fa-solid fa-check fa-fw table-check"></i>` : `<i class="fa-solid fa-xmark fa-fw table-x"></i>`),
+					center: true,
+				},
+				{
+					title: 'Eigen Pagina',
+					key: 'HasOwnPage',
+					valueResolver: (value) => (value ? `<i class="fa-solid fa-check fa-fw table-check"></i>` : `<i class="fa-solid fa-xmark fa-fw table-x"></i>`),
+					center: true,
+				},
+				{
+					title: 'Vroonhof',
+					key: 'VroonhofTag',
+					valueResolver: (value) => (value ? `<i class="fa-solid fa-check fa-fw table-check"></i>` : `<i class="fa-solid fa-xmark fa-fw table-x"></i>`),
+					center: true,
+				},
+				{ title: 'Datum', key: 'Date', type: 'date' },
+				{ title: 'Aangemaakt Op', key: 'CreatedAt', type: 'date' },
+			],
+			rowAttributes: { 'data-id': 'RawData.ID' },
+			onRowClick: (data) => openArchiveItemDrawer(data.RawData),
+			hasWrapper: false,
+			noDataMessage: 'Geen archief items gevonden',
+			searchElement: document.querySelector('.search'),
+			selectable: true,
+			fixed: false,
+			selectButtons: [
+				{
+					text: 'Verwijderen',
+					classes: ['btn', 'btn-danger'],
+					onClick: (selected) => {
+						deleteArchiveModal.open();
+					},
+				},
+			],
+			pagination: {
+				enabled: true,
+				limit: count,
+				page: page,
+				showMore: true,
+				total: archiveTotalArticles,
+				hasAllData: false,
+				saveInUrl: true,
+				dataRetriever: async (page, count) => {
+					const { status, data } = await getRequest(`/api/archive/all?page=${page}&count=${count}`, {
+						'Content-Type': 'application/json',
+						Authorization: 'Bearer ' + token,
+					});
+					return status === 200
+						? Object.values(data.Articles).map((item) => {
+								return {
+									Order: item.Order,
+									Title: item.Title,
+									Description: item.Description['0'],
+									Date: formatDate(item.Date) || `N.v.t.`,
+									OnTimeline: item.OnTimeline,
+									HasOwnPage: item.HasOwnPage,
+									CreatedAt: formatCreateDate(item.CreatedAt),
+									VroonhofTag: item.VroonhofTag,
+									RawData: item,
+								};
+						  })
+						: [];
 				},
 			},
-		],
-		pagination: {
-			enabled: true,
-			limit: count,
-			page: page,
-			showMore: true,
-			total: archiveTotalArticles,
-			hasAllData: false,
-			saveInUrl: true,
-			dataRetriever: async (page, count) => {
-				const { status, data } = await getRequest(`/api/archive/all?page=${page}&count=${count}`, { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token });
-				return status === 200
-					? Object.values(data.Articles).map((item) => {
-							return {
-								Order: item.Order,
-								Title: item.Title,
-								Description: item.Description['0'],
-								Date: formatDate(item.Date) || `N.v.t.`,
-								OnTimeline: item.OnTimeline,
-								HasOwnPage: item.HasOwnPage,
-								CreatedAt: formatCreateDate(item.CreatedAt),
-								VroonhofTag: item.VroonhofTag,
-								RawData: item,
-							};
-					  })
-					: [];
-			},
-		},
-	});
+		});
 
-	lucide.createIcons();
+		lucide.createIcons();
 
-	document.querySelector('.loader').classList.add('close');
+		document.querySelector('.loader').classList.add('close');
+	} catch (error) {
+		document.querySelector('.loader').classList.add('close');
+		console.error('Error initializing table:', error);
+		new Popover(null, {
+			content: `<h3>Fout!</h3>
+				<p>Er is iets fout gegaan tijdens het laden van de pagina. Probeer het later opnieuw.</p>${error.message ? `<p>${error.message}</p>` : ''}`,
+			type: 'error',
+			noIcon: true,
+			sidebarVisible: false,
+			close: false,
+		}).show();
+	}
 }
 
 async function openArchiveItemDrawer(row) {
@@ -301,12 +317,14 @@ const mutationObserver = new MutationObserver((mutationsList, observer) => {
 mutationObserver.observe(document.getElementById('archive-item-photo'), { attributes: true, attributeFilter: ['data-url'], attributeOldValue: true });
 
 const formatDate = (date) => {
-	const { Day, Month, Year } = date;
+	let { Day, Month, Year } = date;
 
 	if (!Day && !Month && !Year) return null;
 
 	if (!Day && !Month) return Year;
 	if (!Day) {
+		// If month is a number, convert it to a string with leading zero if necessary
+		Month = Month < 10 ? `0${Month}` : Month;
 		const month = new Intl.DateTimeFormat('nl-BE', {
 			month: 'short',
 		}).format(new Date(`${Year}-${Month}-01`));
